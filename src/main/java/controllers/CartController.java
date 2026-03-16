@@ -52,11 +52,11 @@ public class CartController {
 	@PostMapping("/increase")
 	public String incrementQuantity(@RequestParam("productId") int productId, HttpSession session) {
 
-		// Get current user ID
+		
 		Users user = (Users) session.getAttribute("currentUser");
 		int userId = user.getId();
 
-		// Call service to update quantity in DB
+		
 		cartService.updateCartItemQuantity(userId, productId, 1); // 1 means increment by 1
 
 		return "redirect:/myCart";
@@ -69,8 +69,8 @@ public class CartController {
 		Users user = (Users) session.getAttribute("currentUser");
 		int userId = user.getId();
 
-		// Call service to update quantity in DB
-		cartService.deleteCartItemQuantity(userId, productId); // 1 means increment by 1
+		
+		cartService.deleteCartItemQuantity(userId, productId); 
 		List<CartItems> afterUpdate = cartService.GetProducts(userId);
 
 		return "redirect:/myCart";

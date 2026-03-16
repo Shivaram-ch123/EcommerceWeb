@@ -1,5 +1,8 @@
 package controllers;
 
+import java.util.*;
+import entity.*;
+
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -15,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import entity.Products;
 import entity.Users;
+import service.ImageService;
 import service.ProductService;
 import service.UserService;
 
@@ -24,6 +28,8 @@ public class ProductController {
 	private ProductService productService;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private ImageService imageService;
 
 //	@PostMapping("/showCategory")
 //	public String getProductsByCategory(String type,Model model) {
@@ -44,19 +50,37 @@ public class ProductController {
 			list = productService.getProductsByCategory(type); // filtered products
 		}
 
+		// Fetch image URLs for each product
+		Map<Long, String> productImages = new HashMap<>();
+		for (Products p : list) {
+			try {
+				Images img = imageService.getImageByProductId(p.getId()); // your service method
+				if (img != null) {
+					productImages.put(p.getId(), img.getUrl());
+				} else {
+					productImages.put(p.getId(), "/images/no-image.png"); // fallback image
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				productImages.put(p.getId(), "/images/no-image.png");
+			}
+		}
+
+		// Add products and their images to model
 		model.addAttribute("products", list);
+		model.addAttribute("productImages", productImages);
 
 		return "HomePage";
 	}
 
 	@GetMapping("/viewProduct")
 	public String viewProduct(@RequestParam("productId") Long productId, Model model) {
-		// Fetch the product from the database using a service
+		// here i need to Fetch the product from the data base
 		Products product = productService.getProductById(productId);
-
+		Images image = imageService.getImageByProductId(productId);
 
 		model.addAttribute("product", product);
-
+		model.addAttribute("image",image);
 
 		return "productView";
 	}

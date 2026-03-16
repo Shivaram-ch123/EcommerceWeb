@@ -122,7 +122,7 @@ th {
 		</c:if>
 
 		<div style="text-align: left; margin-top: 20px;">
-			<a href="homeShow">Go To HomePage</a>
+			<a href="showhomepag">Go To HomePage</a>
 
 		</div>
 

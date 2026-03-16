@@ -15,7 +15,7 @@ public class InformationRepositoryImpl implements InformationRepositoyCustom {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	// Actual method to fetch Information by Users
+
 	public Information findByUser(Users user) {
 		String jpql = "SELECT i FROM Information i WHERE i.user = :user";
 		Query query = entityManager.createQuery(jpql); // generic Query, not TypedQuery
@@ -24,7 +24,7 @@ public class InformationRepositoryImpl implements InformationRepositoyCustom {
 		try {
 			return (Information) query.getSingleResult(); // cast to Information
 		} catch (Exception e) {
-			return null; // no Information found
+			return null; 
 		}
 	}
 }

@@ -66,6 +66,13 @@ public class UserController {
 		return "redirect:/showCategory?category=";
 	}
 
+	@GetMapping("showhomepag")
+	public String showhome() {
+		return "redirect:/showCategory?category=";
+	}
+
+
+
 	@GetMapping("register")
 	public String showReg() {
 		return "Register";
@@ -82,9 +89,6 @@ public class UserController {
 
 		System.out.println(">>>> addToCart HIT <<<<");
 		System.out.println("session currentUser = " + session.getAttribute("currentUser"));
-
-		
-		
 
 		String message = userService.addToCart(user, productId);
 		redirectAttrs.addFlashAttribute("cartMessage", message);
@@ -181,12 +185,10 @@ public class UserController {
 	@PostMapping("/addToWishlist")
 	public String addToWishlist(Long productId, HttpSession session, RedirectAttributes redirectAttributes) {
 
-		
 		Users user = (Users) session.getAttribute("currentUser");
 		if (user == null) {
 			return "redirect:/register";
 		}
-		
 
 		Products product = productService.getProductById(productId);
 		if (product == null) {
@@ -230,11 +232,6 @@ public class UserController {
 		return "HomePage";
 	}
 
-	@GetMapping("/homeShow")
-	public String homeShow() {
-		return "redirect:/showCategory?category=";
-	}
-
 	@PostMapping("/buyNow")
 	public String buyNow(@RequestParam("productId") long productId, Model model) {
 		model.addAttribute("productId", productId);
@@ -247,7 +244,7 @@ public class UserController {
 			HttpSession session) {
 
 		Users user = (Users) session.getAttribute("currentUser");
-
+		System.out.println(user.getUserName() + "-----");
 		Orders order = new Orders();
 		order.setUser(user);
 		order.setAddress(address);
