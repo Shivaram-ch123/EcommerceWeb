@@ -1,5 +1,7 @@
 package controllers;
 
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +13,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import entity.Information;
+import entity.Products;
 import entity.Users;
+import entity.WishlistItem;
+import repository.wishlistRepository;
+import service.ProductService;
 import service.UserService;
+import service.wishlistService;
 
 @Controller
 @RequestMapping("/")
@@ -20,6 +28,10 @@ public class UserController {
 	// some services objects that i need here
 	@Autowired
 	UserService userService;
+	@Autowired
+	ProductService productService;
+	@Autowired
+	wishlistService wishlistService;
 
 	@PostMapping("/registerUser")
 	public String registerUser(Users user) {
@@ -27,6 +39,9 @@ public class UserController {
 		// i need to use thoes services here
 		System.out.println("You are in registerUser Methods");
 		if (userService.registerUser(user)) {
+			// i need to set the user Information
+			Information information = new Information("none", "/images/pImage.jpg", user);
+			userService.saveInformation(information);
 			return "LoginPage";
 		}
 		return "SomeThingWengWrong";
@@ -70,6 +85,119 @@ public class UserController {
 			return "redirect:/showCategory?category=";
 		}
 		return "LoginPage";
+	}
+
+	@RequestMapping("/myProfile")
+	public String showProfile(HttpSession session, Model model) {
+		// Get logged-in user
+		Users user = (Users) session.getAttribute("currentUser");
+
+		if (user != null) {
+			Information info = userService.getInformationByUser(user);
+
+			model.addAttribute("user", user);
+			model.addAttribute("info", info);
+		} else {
+			model.addAttribute("errorMessage", "Please login first!");
+		}
+
+		return "profile";
+	}
+
+	@GetMapping("/updateProfile")
+	public String showUpdateProfile(HttpSession session, Model model) {
+
+		Users currentUser = (Users) session.getAttribute("currentUser");
+
+		if (currentUser != null) {
+			model.addAttribute("user", currentUser);
+		} else {
+			model.addAttribute("errorMessage", "Please login first to update profile!");
+			return "profile";
+		}
+
+		return "updateProfile";
+	}
+
+	@PostMapping("/updateProfileDetails")
+	public String updateProfileDetails(Users updatedUser, HttpSession session, RedirectAttributes redirectAttrs) {
+
+		Users currentUser = (Users) session.getAttribute("currentUser");
+
+		if (currentUser == null) {
+			redirectAttrs.addFlashAttribute("errorMessage", "Please login first to update profile!");
+			return "redirect:/myProfile";
+		}
+
+		if (currentUser.getId() != updatedUser.getId()) {
+			redirectAttrs.addFlashAttribute("errorMessage", "Invalid user update attempt!");
+			return "redirect:/myProfile";
+		}
+
+		try {
+
+			userService.updateUserProfile(updatedUser);
+
+			session.setAttribute("currentUser", updatedUser);
+
+			redirectAttrs.addFlashAttribute("successMessage", "Profile updated successfully!");
+		} catch (Exception e) {
+			e.printStackTrace();
+			redirectAttrs.addFlashAttribute("errorMessage", "Something went wrong while updating profile.");
+		}
+
+		return "redirect:/updateProfile";
+	}
+
+	@PostMapping("/addToWishlist")
+	public String addToWishlist(Long productId, HttpSession session, RedirectAttributes redirectAttributes) {
+
+		Users user = (Users) session.getAttribute("currentUser");
+		if (user == null) {
+			redirectAttributes.addFlashAttribute("cartMessage", "Please log in first!");
+			return "redirect:/login";
+		}
+
+		Products product = productService.getProductById(productId);
+		if (product == null) {
+			redirectAttributes.addFlashAttribute("cartMessage", "Product not found!");
+			return "redirect:/showCategory?category=";
+		}
+
+		boolean added = wishlistService.addProductToWishlist(user, product);
+		if (added) {
+			redirectAttributes.addFlashAttribute("cartMessage", "Product added to your wishlist!");
+		} else {
+			redirectAttributes.addFlashAttribute("cartMessage", "Product is already in your wishlist!");
+		}
+
+		return "redirect:/showCategory?category=";
+	}
+
+	@GetMapping("/showWishlist")
+	public String showWishlist(HttpSession session, Model model) {
+		Users user = (Users) session.getAttribute("currentUser");
+		if (user == null) {
+			return "redirect:/login";
+		}
+		List<Products> wishlist = wishlistService.getWishlistByUser(user);
+		model.addAttribute("wishlistProducts", wishlist);
+		return "wishlist";
+	}
+
+	@PostMapping("/removeFromWishlist")
+	public String removeFromWishList(@RequestParam("productId") Long productId, HttpSession session) {
+		Users user = (Users) session.getAttribute("currentUser");
+		boolean ans = wishlistService.removeProductFromWishlist(user, productId);
+		if (ans) {
+			return "redirect:/showWishlist";
+		}
+		return "error";
+	}
+
+	@GetMapping("/home")
+	public String home() {
+		return "HomePage";
 	}
 
 }

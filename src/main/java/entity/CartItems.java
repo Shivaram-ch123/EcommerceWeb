@@ -1,3 +1,4 @@
+
 package entity;
 
 import javax.persistence.Entity;
@@ -12,60 +13,60 @@ import javax.persistence.Table;
 @Table(name = "cart_items")
 public class CartItems {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-    @JoinColumn(name="productId")
-    private int productId;
-	private int quantity;
+    @ManyToOne
+    @JoinColumn(name = "productid")
+    private Products product;
 
-	@ManyToOne
-	@JoinColumn(name = "user_id") // links to the user's id
-	private Users user;
+    private int quantity;
 
-	// No-argument constructor (required by Hibernate)
-	public CartItems() {
-	}
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private Users user;
 
-	// Parameterized constructor
-	public CartItems( int productId, int quantity, Users user) {
-		this.productId = productId;
-		this.quantity = quantity;
-		this.user = user;
-	}
+    public CartItems() {
+    }
 
-	// Getters and Setters
+    public CartItems(Products product, int quantity, Users user) {
+        this.product = product;
+        this.quantity = quantity;
+        this.user = user;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public int getProductId() {
-		return productId;
-	}
 
-	public void setProductId(int productId) {
-		this.productId = productId;
-	}
+    public Products getProduct() {
+        return product;
+    }
 
-	public int getQuantity() {
-		return quantity;
-	}
+    public void setProduct(Products product) {
+        this.product = product;
+    }
 
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
-	}
+    public int getQuantity() {
+        return quantity;
+    }
 
-	public Users getUser() {
-		return user;
-	}
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
 
-	public void setUser(Users user) {
-		this.user = user;
-	}
+    public Users getUser() {
+        return user;
+    }
+
+    public void setUser(Users user) {
+        this.user = user;
+    }
 }
+

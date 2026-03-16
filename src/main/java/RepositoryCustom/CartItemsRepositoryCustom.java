@@ -3,6 +3,7 @@ package RepositoryCustom;
 import java.util.List;
 
 import entity.CartItems;
+import entity.Users;
 
 public interface CartItemsRepositoryCustom {
 	public void addProductToCart(int userId, int productId, int quantity);
@@ -10,4 +11,6 @@ public interface CartItemsRepositoryCustom {
 	public List<CartItems> getCartItemsByUserId(int userId);
 
 	CartItems findByUserIdAndProductId(int userId, int productId);
+	
+	int getQuantityByUserIdAndProductId(Users user,Long ProductId);
 }

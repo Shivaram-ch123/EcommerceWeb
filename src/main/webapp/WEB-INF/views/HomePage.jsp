@@ -42,6 +42,7 @@ nav select, nav button {
 	margin-left: 10px;
 }
 
+/* Product section */
 .products {
 	display: flex;
 	flex-wrap: wrap;
@@ -58,13 +59,38 @@ nav select, nav button {
 	text-align: center;
 }
 
-.product-card button {
+/* Buttons container */
+.button-row {
+	display: flex;
+	gap: 10px;
+	justify-content: center;
+	margin-top: 10px;
+}
+
+/* Individual button styling */
+.button-inline {
+	flex: 1;
+	padding: 10px;
+	border: none;
+	cursor: pointer;
+	border-radius: 5px;
+}
+
+.button-cart {
 	background: #6c757d;
 	color: white;
-	border: none;
-	padding: 10px;
-	cursor: pointer;
+}
+
+.button-view {
+	background: #007bff;
+	color: white;
+}
+
+.button-wishlist {
+	background: red;
+	color: white;
 	margin-top: 10px;
+	width: 100%;
 }
 </style>
 
@@ -72,12 +98,9 @@ nav select, nav button {
 <body>
 
 	<header>
-
 		<h1>My E-Commerce Store</h1>
 
 		<nav>
-
-			<!-- Added Top Right Buttons -->
 			<form action="myCart" method="get">
 				<button type="submit">MyCart</button>
 			</form>
@@ -99,10 +122,15 @@ nav select, nav button {
 				<button type="submit">Show Products</button>
 			</form>
 
+
+			<form action="${pageContext.request.contextPath}/showWishlist"
+				method="get">
+				<button type="submit" class="button-inline button-view">My
+					Wishlist</button>
+			</form>
 		</nav>
 
 		<div style="clear: both;"></div>
-
 	</header>
 
 	<main>
@@ -126,16 +154,25 @@ nav select, nav button {
 							<p>Stock: ${product.stock}</p>
 							<p>Category: ${product.category}</p>
 
-							<form action="addToCart" method="post"
-								style="display: inline-block;">
-								<input type="hidden" name="productId" value="${product.id}">
-								<button type="submit">Add To Cart</button>
-							</form>
+							<!-- First row: Add To Cart + View -->
+							<div class="button-row">
+								<form action="addToCart" method="post">
+									<input type="hidden" name="productId" value="${product.id}">
+									<button type="submit" class="button-inline button-cart">Add
+										To Cart</button>
+								</form>
 
-							<form action="viewProduct" method="get"
-								style="display: inline-block;">
+								<form action="viewProduct" method="get">
+									<input type="hidden" name="productId" value="${product.id}">
+									<button type="submit" class="button-inline button-view">View</button>
+								</form>
+							</div>
+
+							<!-- Second row: Wishlist button -->
+							<form action="addToWishlist" method="post">
 								<input type="hidden" name="productId" value="${product.id}">
-								<button type="submit">View</button>
+								<button type="submit" class="button-inline button-wishlist">Add
+									to Wishlist</button>
 							</form>
 
 						</div>
@@ -154,8 +191,7 @@ nav select, nav button {
 
 	<footer
 		style="background: #222; color: white; text-align: center; padding: 20px; margin-top: 40px;">
-		&copy; 2026 My E-Commerce Store
-	</footer>
+		&copy; 2026 My E-Commerce Store </footer>
 
 </body>
 </html>

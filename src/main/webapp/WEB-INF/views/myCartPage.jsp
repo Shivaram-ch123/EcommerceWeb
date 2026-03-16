@@ -74,15 +74,15 @@ th {
 
 					<c:forEach var="item" items="${cartItems}">
 						<tr>
-							<td>${productMap[item.id].name}</td>
-							<td>${productMap[item.id].cost}</td>
+							<td>${item.product.name}</td>
+							<td>${item.product.cost}</td>
 							<td>
 								<div class="quantity-buttons">
 									<!-- Decrement button form -->
 									<form method="post" action="decrease">
 										<input type="hidden" name="productId"
-											value="${item.productId}" /> <input type="hidden"
-											name="action" value="decrease" />
+											value="${item.product.id}" /> 
+										<input type="hidden" name="action" value="decrease" />
 										<button type="submit">-</button>
 									</form>
 
@@ -91,13 +91,13 @@ th {
 									<!-- Increment button form -->
 									<form method="post" action="increase">
 										<input type="hidden" name="productId"
-											value="${item.productId}" /> <input type="hidden"
-											name="action" value="increase" />
+											value="${item.product.id}" /> 
+										<input type="hidden" name="action" value="increase" />
 										<button type="submit">+</button>
 									</form>
 								</div>
 							</td>
-							<td>${productMap[item.id].cost * item.quantity}</td>
+							<td>${item.product.cost * item.quantity}</td>
 						</tr>
 					</c:forEach>
 				</table>

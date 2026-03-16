@@ -9,48 +9,42 @@ import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Repository;
 
-import com.entities.Cart_Items;
-
 import RepositoryCustom.CartItemsRepositoryCustom;
 import entity.CartItems;
 import entity.Products;
 import entity.Users;
 
-@Repository
+@Repository 
+@Transactional
 public class CartItemsRepositoryImpl implements CartItemsRepositoryCustom {
 	@PersistenceContext
 	private EntityManager em;
 
-	@Transactional
+	
 	@Override
 	public void addProductToCart(int userId, int productId, int quantity) {
 
-		// Fetch the user
-		Users user = em.find(Users.class, userId);
-		if (user == null) {
-			throw new RuntimeException("User with ID " + userId + " not found.");
-		}
+	    Users user = em.find(Users.class, userId);
+	    Products product = em.find(Products.class, (long) productId);
 
-		// Check if product already exists in cart (classic for-loop)
-		CartItems existingItem = null;
-		for (CartItems c : user.getCarts()) {
-			if (c.getProductId() == productId) {
-				existingItem = c;
-				break;
-			}
-		}
+	    String jpql = "SELECT c FROM CartItems c WHERE c.user.id = :userId AND c.product.id = :productId";
 
-		if (existingItem != null) {
-			// Increment quantity if already in cart
-			existingItem.setQuantity(existingItem.getQuantity() + quantity);
-			em.merge(existingItem);
-		} else {
-			// Create new CartItems
-			CartItems cartItem = new CartItems(productId, quantity, user);
-			user.getCarts().add(cartItem);
-			em.persist(cartItem);
-		}
+	    List<CartItems> list = em.createQuery(jpql, CartItems.class)
+	            .setParameter("userId", userId)
+	            .setParameter("productId", (long) productId)
+	            .getResultList();
+
+	    if (!list.isEmpty()) {
+	        CartItems existing = list.get(0);
+	        existing.setQuantity(existing.getQuantity() + quantity);
+	    } 
+	    else {
+	        CartItems cartItem = new CartItems(product, quantity, user);
+	        em.persist(cartItem);
+	    }
 	}
+	
+
 
 	public List<CartItems> getCartItemsByUserId(int userId) {
 
@@ -64,8 +58,9 @@ public class CartItemsRepositoryImpl implements CartItemsRepositoryCustom {
 
 	@Transactional
 	@Override
-	public CartItems findByUserIdAndProductId(int userId, int productId) {
-		String jpql = "SELECT c FROM CartItems c WHERE c.user.id = :userId AND c.productId = :productId";
+	public CartItems findByUserIdAndProductId(int userId, int productId1) {
+		long productId = productId1;
+		String jpql = "SELECT c FROM CartItems c WHERE c.user.id = :userId AND c.product.id = :productId";
 		Query query = em.createQuery(jpql);
 		query.setParameter("userId", userId);
 		query.setParameter("productId", productId);
@@ -75,5 +70,20 @@ public class CartItemsRepositoryImpl implements CartItemsRepositoryCustom {
 		} catch (Exception e) {
 			return null; // Return null if no cart item found
 		}
+	}
+	
+	@Override
+	public int getQuantityByUserIdAndProductId(Users user, Long productId) {
+
+	    String jpql = "SELECT c.quantity FROM CartItems c WHERE c.user = :user AND c.product.id = :productId";
+
+	    try {
+	        return em.createQuery(jpql, Integer.class)
+	                .setParameter("user", user)
+	                .setParameter("productId", productId.intValue())
+	                .getSingleResult();
+	    } catch (Exception e) {
+	        return 0;
+	    }
 	}
 }

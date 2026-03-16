@@ -40,34 +40,69 @@ public class OrdersController {
 
 		Users user = (Users) session.getAttribute("currentUser");
 
-		// get cart items
 		List<CartItems> cartList = cartItemsRepository.getCartItemsByUserId(user.getId());
 
-		// convert cart items -> products list
-		List<Products> products = new ArrayList<>();
-
-		for (CartItems item : cartList) {
-			Products product = productRepository.findById((long) item.getProductId()).orElse(null);
-			if (product != null) {
-				products.add(product);
-			}
-		}
-
-		// create order
 		Orders order = new Orders();
 		order.setUser(user);
-		order.setProducts(products);
 		order.setAddress(address);
 		order.setPaymentMode(paymentMode);
 		order.setDateOfDelivery(LocalDate.parse(dateOfDelivery));
 
-		// save order
+		List<OrderItem> orderItems = new ArrayList<>();
+
+		for (CartItems item : cartList) {
+			Products product = productRepository.findById((long) item.getProduct().getId()).orElse(null);
+
+			if (product != null) {
+				OrderItem orderItem = new OrderItem();
+				orderItem.setOrder(order);
+				orderItem.setProduct(product);
+				orderItem.setQuantity(item.getQuantity()); // important
+
+				orderItems.add(orderItem);
+			}
+		}
+
+		order.setProducts(orderItems);
+
 		orderService.saveOrder(order);
 
-		// clear cart
 		cartItemsRepository.deleteAll(cartList);
 
 		return "orderSuccess";
+	}
+
+	@GetMapping("/myOrders")
+	public String showMyOrder(HttpSession session, org.springframework.ui.Model model) {
+
+		Users user = (Users) session.getAttribute("currentUser");
+
+		List<Orders> list = orderService.showOrderItems(user);
+		HashMap<Orders, Integer> hmap = new HashMap<>();
+		for (int i = 0; i < list.size(); i++) {
+			List<OrderItem> productsList = list.get(i).getProducts();
+			int sum = 0;
+			for (int j = 0; j < productsList.size(); j++) {
+				sum += (productsList.get(j).getQuantity() * productsList.get(j).getProduct().getCost());
+			}
+			hmap.put(list.get(i), sum);
+		}
+
+		model.addAttribute("ordersList", hmap);
+
+		return "myOrders";
+	}
+
+	@PostMapping("/cancelProduct")
+	public String cancelProduct(@RequestParam("orderItemId") int orderItemId, HttpSession session) {
+		Users user = (Users) session.getAttribute("currentUser");
+		if (user == null) {
+			return "redirect:/startpoint"; // user not logged in
+		}
+
+		orderService.removeOrderItem(orderItemId, user.getId());
+
+		return "redirect:/myOrders"; // refresh the orders page
 	}
 
 }

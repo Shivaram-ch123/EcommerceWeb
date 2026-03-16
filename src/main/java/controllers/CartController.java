@@ -34,7 +34,7 @@ public class CartController {
 
 		Map<Integer, Products> productMap = new HashMap<>();
 		for (CartItems item : list) {
-			Products product = cartService.getProductById((long) item.getProductId()); // you need this method
+			Products product = cartService.getProductById((long) item.getProduct().getId()); // you need this method
 			productMap.put(item.getId(), product);
 		}
 
