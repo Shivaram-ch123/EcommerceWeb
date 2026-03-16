@@ -128,6 +128,12 @@ nav select, nav button {
 				<button type="submit" class="button-inline button-view">My
 					Wishlist</button>
 			</form>
+
+			<form action="${pageContext.request.contextPath}/showlogin"
+				method="get">
+				<button type="submit"
+					style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Logout</button>
+			</form>
 		</nav>
 
 		<div style="clear: both;"></div>

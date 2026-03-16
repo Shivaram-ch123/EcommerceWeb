@@ -74,8 +74,12 @@ public class OrdersController {
 
 	@GetMapping("/myOrders")
 	public String showMyOrder(HttpSession session, org.springframework.ui.Model model) {
-
 		Users user = (Users) session.getAttribute("currentUser");
+		if (user == null) {
+			return "redirect:/register";
+		}
+
+		
 
 		List<Orders> list = orderService.showOrderItems(user);
 		HashMap<Orders, Integer> hmap = new HashMap<>();

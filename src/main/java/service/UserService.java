@@ -3,6 +3,8 @@ package service;
 import repository.*;
 import repository.*;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -78,6 +80,10 @@ public class UserService {
 		}
 
 		return false; // User with given ID not found
+	}
+
+	public List<Users> getAllUsers() {
+		return userRepository.findAll();
 	}
 
 }

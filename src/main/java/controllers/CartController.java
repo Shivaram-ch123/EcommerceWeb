@@ -30,6 +30,11 @@ public class CartController {
 	@GetMapping("/myCart")
 	public String showCart(HttpSession session, Model model) {
 
+		Users user = (Users) session.getAttribute("currentUser");
+		if (user == null) {
+			return "redirect:/register";
+		}
+
 		List<CartItems> list = cartService.GetProducts(((Users) session.getAttribute("currentUser")).getId());
 
 		Map<Integer, Products> productMap = new HashMap<>();
@@ -56,6 +61,7 @@ public class CartController {
 
 		return "redirect:/myCart";
 	}
+
 	@PostMapping("/decrease")
 	public String DecrementQuantity(@RequestParam("productId") int productId, HttpSession session) {
 
@@ -64,10 +70,9 @@ public class CartController {
 		int userId = user.getId();
 
 		// Call service to update quantity in DB
-	    cartService.deleteCartItemQuantity(userId, productId); // 1 means increment by 1
-	    List<CartItems> afterUpdate = cartService.GetProducts(userId);
-	    
-	    
+		cartService.deleteCartItemQuantity(userId, productId); // 1 means increment by 1
+		List<CartItems> afterUpdate = cartService.GetProducts(userId);
+
 		return "redirect:/myCart";
 	}
 

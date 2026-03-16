@@ -8,68 +8,86 @@
 <title>Product Details</title>
 <style>
 body {
-	font-family: Arial;
-	background: #f5f5f5;
-	padding: 20px;
+    font-family: Arial;
+    background: #f5f5f5;
+    padding: 20px;
 }
 
 .product-details {
-	background: white;
-	padding: 30px;
-	border-radius: 8px;
-	max-width: 500px;
-	margin: 50px auto;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 500px;
+    margin: 50px auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .product-details h2 {
-	margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .product-details p {
-	margin: 10px 0;
-	font-size: 16px;
+    margin: 10px 0;
+    font-size: 16px;
 }
 
 .back-button {
-	margin-top: 20px;
-	display: inline-block;
-	padding: 10px 15px;
-	background: #6c757d;
-	color: white;
-	text-decoration: none;
-	border-radius: 5px;
+    margin-top: 20px;
+    display: inline-block;
+    padding: 10px 15px;
+    background: #6c757d;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.buy-now-button {
+    background: #28a745; /* green */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    float: right; /* bottom-right positioning */
+    margin-top: 10px;
 }
 </style>
 </head>
 <body>
 
-	<div class="product-details">
-		<h2>Product Details</h2>
+    <div class="product-details">
+        <h2>Product Details</h2>
 
-		<p>
-			<strong>ID:</strong> ${product.id}
-		</p>
-		<p>
-			<strong>Name:</strong> ${product.name}
-		</p>
-		<p>
-			<strong>Price:</strong> ₹ ${product.cost}
-		</p>
-		<p>
-			<strong>Stock:</strong> ${product.stock}
-		</p>
-		<p>
-			<strong>Category:</strong> ${product.category}
-		</p>
+        <p>
+            <strong>ID:</strong> ${product.id}
+        </p>
+        <p>
+            <strong>Name:</strong> ${product.name}
+        </p>
+        <p>
+            <strong>Price:</strong> ₹ ${product.cost}
+        </p>
+        <p>
+            <strong>Stock:</strong> ${product.stock}
+        </p>
+        <p>
+            <strong>Category:</strong> ${product.category}
+        </p>
 
-		<a href="showCategory?category=" class="back-button">Back to
-			Products</a>
-		<form action="addToCart" method="post">
-			<input type="hidden" name="productId" value="${product.id}">
-			<button type="submit" class="back-button">Add to Cart</button>
-		</form>
-	</div>
+        <!-- Buttons -->
+        <a href="showCategory?category=" class="back-button">Back to Products</a>
+
+        <form action="addToCart" method="post" style="display:inline-block;">
+            <input type="hidden" name="productId" value="${product.id}">
+            <button type="submit" class="back-button">Add to Cart</button>
+        </form>
+
+        <form action="buyNow" method="post">
+            <input type="hidden" name="productId" value="${product.id}">
+            <button type="submit" class="buy-now-button">Buy Now</button>
+        </form>
+    </div>
 
 </body>
 </html>

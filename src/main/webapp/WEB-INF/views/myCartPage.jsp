@@ -78,21 +78,19 @@ th {
 							<td>${item.product.cost}</td>
 							<td>
 								<div class="quantity-buttons">
-									<!-- Decrement button form -->
 									<form method="post" action="decrease">
 										<input type="hidden" name="productId"
-											value="${item.product.id}" /> 
-										<input type="hidden" name="action" value="decrease" />
+											value="${item.product.id}" /> <input type="hidden"
+											name="action" value="decrease" />
 										<button type="submit">-</button>
 									</form>
 
 									${item.quantity}
 
-									<!-- Increment button form -->
 									<form method="post" action="increase">
 										<input type="hidden" name="productId"
-											value="${item.product.id}" /> 
-										<input type="hidden" name="action" value="increase" />
+											value="${item.product.id}" /> <input type="hidden"
+											name="action" value="increase" />
 										<button type="submit">+</button>
 									</form>
 								</div>
@@ -112,14 +110,23 @@ th {
 
 		</c:choose>
 
-		<!-- Continue button at bottom right -->
-		<div style="text-align: right; margin-top: 20px;">
-			<a href="checkout">
-				<button
-					style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer;">
-					Continue</button>
-			</a>
+
+		<c:if test="${not empty cartItems}">
+			<div style="text-align: right; margin-top: 20px;">
+				<a href="checkout">
+					<button
+						style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer;">
+						Continue</button>
+				</a>
+			</div>
+		</c:if>
+
+		<div style="text-align: left; margin-top: 20px;">
+			<a href="homeShow">Go To HomePage</a>
+
 		</div>
+
+
 
 	</div>
 
