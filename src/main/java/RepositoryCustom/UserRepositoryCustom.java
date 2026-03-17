@@ -11,6 +11,6 @@ public interface UserRepositoryCustom {
 	public boolean userExistanceByEmailAndPassword(String email, String password);
 
 	public Users userExistanceByEmailAndPasswordReturn(String email, String password);
-
+	public boolean userExistsByEmail(String email);
 	
 }

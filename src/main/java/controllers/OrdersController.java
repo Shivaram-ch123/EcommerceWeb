@@ -1,7 +1,5 @@
 package controllers;
 
-import java.util.List;
-
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +14,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import repository.CartItemsRepository;
+import repository.OrderItemRepository;
 import repository.ProductRepository;
 import service.CartService;
 import service.ImageService;
@@ -40,24 +39,29 @@ public class OrdersController {
 
 	@PostMapping("/placeOrder")
 	public String placeOrder(@RequestParam String address, @RequestParam String paymentMode,
-			@RequestParam int deliveryDays, @RequestParam double totalAmount, HttpSession session, Model model) { 
-																													
-																													
+			@RequestParam int deliveryDays, @RequestParam double totalAmount, HttpSession session, Model model) {
 
 		Users user = (Users) session.getAttribute("currentUser");
 
 		List<CartItems> cartList = cartItemsRepository.getCartItemsByUserId(user.getId());
-
+		for(CartItems c : cartList) {
+			int stock = c.getProduct().getStock();
+			int quantity = c.getQuantity();
+			if(quantity>stock) {
+				return "ordersNotAvailable";
+			}
+			
+		}
+		
+		
 		Orders order = new Orders();
 		order.setUser(user);
 		order.setAddress(address);
 		order.setPaymentMode(paymentMode);
 
-		
 		LocalDate deliveryDate = LocalDate.now().plusDays(deliveryDays);
 		order.setDateOfDelivery(deliveryDate);
 
-	
 		order.setTotalAmount(totalAmount);
 
 		List<OrderItem> orderItems = new ArrayList<>();
@@ -68,14 +72,12 @@ public class OrdersController {
 
 			if (product != null) {
 
-			
 				int newStock = product.getStock() - item.getQuantity();
 				if (newStock < 0)
-					newStock = 0; 
+					newStock = 0;
 				product.setStock(newStock);
-				productRepository.save(product); 
+				productRepository.save(product);
 
-				
 				OrderItem orderItem = new OrderItem();
 				orderItem.setOrder(order);
 				orderItem.setProduct(product);
@@ -92,7 +94,6 @@ public class OrdersController {
 
 		cartItemsRepository.deleteAll(cartList);
 
-	
 		model.addAttribute("order", order);
 
 		return "orderSuccess";
@@ -135,6 +136,19 @@ public class OrdersController {
 		orderService.removeOrderItem(orderItemId, user.getId());
 
 		List<Orders> ordersList = orderService.showOrderItems(user);
+
+		OrderItem ordItem = orderService.getOrderItemById(orderItemId);
+		long prodIt = ordItem.getProduct().getId();
+
+		int quantity = ordItem.getQuantity();
+		Optional<Products> productOpt = productRepository.findById(prodIt);
+		if (productOpt.isPresent()) {
+			Products product = productOpt.get();
+			// Increase stock by canceled quantity
+			product.setStock(product.getStock() + quantity);
+			// Save updated product
+			productRepository.save(product);
+		}
 
 		// Map to hold productId -> list of images
 		Map<Long, Images> productImagesMap = new HashMap<>();

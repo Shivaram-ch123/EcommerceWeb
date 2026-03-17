@@ -60,24 +60,24 @@ public class OrderService {
 
 				// check if any ACTIVE items remain
 				boolean hasActiveItem = false;
-				double sum=0;
+				double sum = 0;
 				for (OrderItem oi : order.getProducts()) {
 					if (oi.getStatus().equals("ACTIVE") && oi.getId() != item.getId()) {
 						hasActiveItem = true;
 					}
-					
-					if(oi.getStatus().equals("ACTIVE"))sum+=oi.getProduct().getCost();
-					
+
+					if (oi.getStatus().equals("ACTIVE"))
+						sum += oi.getProduct().getCost();
+
 				}
 
-				newTotal=sum;
-				if(newTotal < 300)newTotal+=120;
+				newTotal = sum;
+				if (newTotal < 300)
+					newTotal += 120;
 				if (!hasActiveItem) {
 					newTotal = 0;
 				}
-				
-				
-				
+
 				order.setTotalAmount(newTotal);
 
 				// save
@@ -88,4 +88,10 @@ public class OrderService {
 			}
 		}
 	}
+
+	public OrderItem getOrderItemById(int orderItemId) {
+		Optional<OrderItem> optionalItem = orderItemRepository.findById(orderItemId);
+		return optionalItem.orElse(null); // returns null if not found
+	}
+
 }

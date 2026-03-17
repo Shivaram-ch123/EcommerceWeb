@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import entity.CartItems;
 import entity.Users;
 import service.CartService;
+import service.ProductService;
 import service.UserService;
 
 @Controller
@@ -26,6 +27,9 @@ public class CartController {
 	// some services objects that i need here
 	@Autowired
 	CartService cartService;
+	
+	@Autowired
+	ProductService productService;
 
 	@GetMapping("/myCart")
 	public String showCart(HttpSession session, Model model) {
@@ -51,13 +55,15 @@ public class CartController {
 
 	@PostMapping("/increase")
 	public String incrementQuantity(@RequestParam("productId") int productId, HttpSession session) {
-
+		
 		
 		Users user = (Users) session.getAttribute("currentUser");
 		int userId = user.getId();
 
 		
-		cartService.updateCartItemQuantity(userId, productId, 1); // 1 means increment by 1
+		int quant = cartService.updateCartItemQuantity(userId, productId, 1); // 1 means increment by 1
+		Products product = productService.getProductById((long)productId);
+		
 
 		return "redirect:/myCart";
 	}

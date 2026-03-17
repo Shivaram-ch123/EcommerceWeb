@@ -1,5 +1,6 @@
 package controllers;
-
+import java.util.*;
+import repository.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import entity.CartItems;
+import entity.Images;
 import entity.Information;
 import entity.OrderItem;
 import entity.Orders;
@@ -26,6 +28,8 @@ import entity.Products;
 import entity.Users;
 import entity.WishlistItem;
 import repository.wishlistRepository;
+import service.CartService;
+import service.ImageService;
 import service.OrderService;
 import service.ProductService;
 import service.UserService;
@@ -43,6 +47,14 @@ public class UserController {
 	wishlistService wishlistService;
 	@Autowired
 	OrderService orderService;
+	@Autowired
+	InformationRepository informationRepository;
+	@Autowired
+	CartService cartService;
+	@Autowired
+	ImageService imageService;
+	@Autowired
+	CartItemsRepository cartItemsRepository;
 
 	@PostMapping("/registerUser")
 	public String registerUser(@Valid @ModelAttribute("user") Users user, BindingResult bindingResult, Model model) {
@@ -55,16 +67,19 @@ public class UserController {
 
 		System.out.println(user.getId() + " " + user.getEmail() + " " + user.getPassword());
 
-		// Use your existing service to register user
+		
 		if (userService.registerUser(user)) {
-			// Set default user information
+			
 			Information information = new Information("none", "/images/pImage.jpg", user);
 			userService.saveInformation(information);
-			return "LoginPage"; // registration successful
+			return "redirect:/showCategory?category="; 
+		}
+		else {
+			
 		}
 
-		// If something went wrong during registration
-		model.addAttribute("errorMessage", "Something went wrong. Please try again.");
+		
+		model.addAttribute("errorMessage", "Email Exists. Please try again.");
 		return "Register";
 	}
 
@@ -79,7 +94,7 @@ public class UserController {
 		return "redirect:/showCategory?category=";
 	}
 
-	@GetMapping("showhomepag")
+	@GetMapping("/showhomepag")
 	public String showhome() {
 		return "redirect:/showCategory?category=";
 	}
@@ -91,33 +106,82 @@ public class UserController {
 	}
 
 	@PostMapping("/addToCart")
-	public String addToCart(@RequestParam("productId") Integer productId, HttpSession session,
-			RedirectAttributes redirectAttrs) { // Add RedirectAttributes
+	public String addToCart(@RequestParam("productId") Integer productId,
+	                       HttpSession session,
+	                       RedirectAttributes redirectAttrs,
+	                       Model model) {
 
-		Users user = (Users) session.getAttribute("currentUser");
-		if (user == null) {
-			return "redirect:/register";
-		}
+	    Users user = (Users) session.getAttribute("currentUser");
+	    if (user == null) {
+	        return "redirect:/register";
+	    }
 
-		System.out.println(">>>> addToCart HIT <<<<");
-		System.out.println("session currentUser = " + session.getAttribute("currentUser"));
+	    int userId = user.getId();
 
-		String message = userService.addToCart(user, productId);
-		redirectAttrs.addFlashAttribute("cartMessage", message);
+	    // Get current quantity of this product in user's cart
+	    int userQuantity =cartService.updateCartItemQuantity(userId, productId, 0); 
 
-		return "redirect:/showCategory?category=";
+	    Products product = productService.getProductById((long) productId);
+
+	    // 🔴 STOCK CHECK
+	    if (userQuantity >= product.getStock()) {
+	        redirectAttrs.addFlashAttribute("cartMessage", "No stock available for this product!");
+	        return "redirect:/showCategory?category=";
+	    }
+
+	    // ✅ ADD TO CART
+	    String message = userService.addToCart(user, productId);
+	    redirectAttrs.addFlashAttribute("cartMessage", message);
+
+	    return "redirect:/showCategory?category=";
+	}
+	@PostMapping("/addToCart1")
+	public String addToCart1(@RequestParam("productId") Integer productId,
+	                       HttpSession session,
+	                       RedirectAttributes redirectAttrs,
+	                       Model model) {
+
+	    Users user = (Users) session.getAttribute("currentUser");
+	    if (user == null) {
+	        return "redirect:/register";
+	    }
+
+	    int userId = user.getId();
+
+	    // Get current quantity of this product in user's cart
+	    int userQuantity =cartService.updateCartItemQuantity(userId, productId, 0); 
+
+	    Products product = productService.getProductById((long) productId);
+
+	    // 🔴 STOCK CHECK
+	    if (userQuantity >= product.getStock()) {
+	        redirectAttrs.addFlashAttribute("cartMessage", "No stock available for this product!");
+	        return "redirect:/isAvailable";
+	    }
+
+	    // ✅ ADD TO CART
+	    String message = userService.addToCart(user, productId);
+	    redirectAttrs.addFlashAttribute("cartMessage", message);
+	    
+	    return "redirect:/viewProductdublicate?productId="+productId;
+	}
+	
+	@GetMapping("/isAvailable")
+	public String temp() {
+		return "ordersNotAvailable";
 	}
 
 	@PostMapping("/checkUser")
 	public String checkUser(@RequestParam("email") String email, @RequestParam("password") String password,
-			HttpSession session) {
+			HttpSession session ,Model model) {
 
 		Users user = userService.checkUserExistsReturn(email, password);
 		if (user != null) {
 			session.setAttribute("currentUser", user);
-			return "redirect:/showCategory?category=";
+			return "redirect:/";
 		}
-		return "LoginPage";
+		 
+		return "redirect:/showlogin";
 	}
 
 	@RequestMapping("/myProfile")
@@ -153,8 +217,9 @@ public class UserController {
 	}
 
 	@PostMapping("/updateProfileDetails")
-	public String updateProfileDetails(Users updatedUser, HttpSession session, RedirectAttributes redirectAttrs) {
-
+	public String updateProfileDetails(Users updatedUser, HttpSession session, RedirectAttributes redirectAttrs,@RequestParam("address") String add) {
+		
+		
 		Users currentUser = (Users) session.getAttribute("currentUser");
 
 		if (currentUser == null) {
@@ -182,6 +247,11 @@ public class UserController {
 			}
 
 			userService.updateUserProfile(updatedUser);
+			
+			// here i need to save in to the infotable
+			Information info=  informationRepository.findByUser(updatedUser);
+			info.setAddress(add);
+			informationRepository.save(info);
 
 			session.setAttribute("currentUser", updatedUser);
 
@@ -222,10 +292,25 @@ public class UserController {
 	public String showWishlist(HttpSession session, Model model) {
 		Users user = (Users) session.getAttribute("currentUser");
 		if (user == null) {
-			return "redirect:/login";
+			return "redirect:/showlogin";
 		}
 		List<Products> wishlist = wishlistService.getWishlistByUser(user);
+
+		// map product IDs to their first image (if exists)
+		Map<Long, Images> productImages = new HashMap<>();
+		for (Products p : wishlist) {
+		    Images img = imageService.getImageByProductId(p.getId()); 
+		    if (img != null) {
+		        productImages.put(p.getId(), img);
+		    }
+		}
+
 		model.addAttribute("wishlistProducts", wishlist);
+		model.addAttribute("productImages", productImages);
+		
+		
+		
+
 		return "wishlist";
 	}
 
@@ -243,10 +328,41 @@ public class UserController {
 	public String home() {
 		return "HomePage";
 	}
+	
+	@GetMapping("/viewProductdublicate")
+	public String home1(@RequestParam("productId") Long productId, Model model) {
+		
+		Products product = productService.getProductById(productId);
+		Images image = imageService.getImageByProductId(productId);
+
+		model.addAttribute("product", product);
+		model.addAttribute("image",image);
+
+		return "wishlistviewProduct";
+	}
 
 	@PostMapping("/buyNow")
-	public String buyNow(@RequestParam("productId") long productId, Model model) {
+	public String buyNow(@RequestParam("productId") long productId, Model model,HttpSession session) {
 		model.addAttribute("productId", productId);
+		
+		
+		//Users user = (Users) session.getAttribute("currentUser");
+
+		
+		Users user = (Users) session.getAttribute("currentUser");
+
+		Products product = productService.getProductById(productId);
+			if(1>product.getStock()) {
+				return "ordersNotAvailable";
+			}
+		
+		
+		
+		
+		
+		
+		
+		
 		return "getDetails";
 	}
 

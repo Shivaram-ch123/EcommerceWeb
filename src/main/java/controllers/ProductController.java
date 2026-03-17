@@ -45,16 +45,16 @@ public class ProductController {
 		List<Products> list;
 
 		if (type == null || type.isEmpty()) {
-			list = productService.getAllProducts(); // show all products
+			list = productService.getAllProducts(); 
 		} else {
-			list = productService.getProductsByCategory(type); // filtered products
+			list = productService.getProductsByCategory(type); 
 		}
 
-		// Fetch image URLs for each product
+
 		Map<Long, String> productImages = new HashMap<>();
 		for (Products p : list) {
 			try {
-				Images img = imageService.getImageByProductId(p.getId()); // your service method
+				Images img = imageService.getImageByProductId(p.getId()); 
 				if (img != null) {
 					productImages.put(p.getId(), img.getUrl());
 				} else {
@@ -75,7 +75,7 @@ public class ProductController {
 
 	@GetMapping("/viewProduct")
 	public String viewProduct(@RequestParam("productId") Long productId, Model model) {
-		// here i need to Fetch the product from the data base
+		
 		Products product = productService.getProductById(productId);
 		Images image = imageService.getImageByProductId(productId);
 

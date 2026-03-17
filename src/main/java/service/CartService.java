@@ -23,12 +23,15 @@ public class CartService {
 		return productService.getProductById(productId);
 	}
 
-	public void updateCartItemQuantity(int userId, int productId, int change) {
+	public int updateCartItemQuantity(int userId, int productId, int change) {
 		CartItems item = cartItemsRepository.findByUserIdAndProductId(userId, productId);
+		int quantity=0;
 		if (item != null) {
 			item.setQuantity(item.getQuantity() + change);
 			cartItemsRepository.save(item); // persist to DB
+			quantity = item.getQuantity();
 		}
+		return quantity;
 		
 	}
 	public CartItems deleteCartItemQuantity(int userId, int productId) {

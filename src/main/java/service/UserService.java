@@ -22,14 +22,14 @@ public class UserService {
 	@Autowired
 	private InformationRepository informationRepository;
 
-	// Other existing methods like registerUser, checkUserExistsReturn, etc.
+	
 
-	// Save Information entity
+
 	public void saveInformation(Information info) {
 		informationRepository.save(info);
 	}
 
-	// Fetch Information by user
+	
 	public Information getInformationByUser(entity.Users user) {
 		return informationRepository.findByUser(user);
 	}
@@ -39,7 +39,9 @@ public class UserService {
 	}
 
 	public boolean registerUser(Users user) {
-		// here this service will take care of the user services
+		
+		boolean checkingIfUserExists = userRepository.userExistsByEmail(user.getEmail());
+		if(checkingIfUserExists)return false;
 		Users resultUser = userRepository.save(user);
 		if (resultUser != null) {
 			return true;

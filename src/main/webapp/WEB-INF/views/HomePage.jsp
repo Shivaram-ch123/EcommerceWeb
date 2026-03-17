@@ -5,7 +5,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>My E-Commerce Store</title>
+<title>Techouts Store</title>
 
 <!-- Google Fonts -->
 <link
@@ -145,17 +145,20 @@ h2 {
 .button-row {
 	display: flex;
 	gap: 10px;
+	justify-content: space-between;
 	margin-top: 10px;
 }
 
 .button-inline {
 	flex: 1;
 	padding: 10px;
+	width: 100px;
 	border-radius: 5px;
 	border: none;
 	cursor: pointer;
 	font-weight: 500;
 	transition: 0.3s;
+	border-radius: 5px;
 }
 
 .button-cart {
@@ -197,6 +200,20 @@ footer {
 	font-size: 0.95em;
 }
 
+/* Floating message styles */
+.floating-message {
+	position: fixed;
+	top: 70px; /* just below the header */
+	left: 50%;
+	transform: translateX(-50%);
+	padding: 12px 20px;
+	border-radius: 8px;
+	font-weight: 500;
+	z-index: 2000;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+	opacity: 0.95;
+}
+
 /* Responsive adjustments */
 @media ( max-width : 600px) {
 	nav {
@@ -216,8 +233,19 @@ footer {
 <body>
 
 	<header>
-		<h1>My E-Commerce Store</h1>
+		<h1>Techouts Store</h1>
 		<nav>
+			<!-- Show Signin only if user is not logged in -->
+			<c:if test="${empty sessionScope.currentUser}">
+				<form action="showlogin" method="get">
+					<button type="submit">Signin</button>
+				</form>
+			</c:if>
+			
+			<form action="showhomepag" method="get">
+				<button type="submit">Home</button>
+			</form>
+			<!-- Other nav buttons always visible -->
 			<form action="myCart" method="get">
 				<button type="submit">My Cart</button>
 			</form>
@@ -245,20 +273,30 @@ footer {
 				<button type="submit">Wishlist</button>
 			</form>
 
-			<form action="${pageContext.request.contextPath}/showlogin"
-				method="get">
-				<button type="submit" style="background: #dc3545; color: white;">Logout</button>
-			</form>
+			<!-- Show Logout only if user is logged in -->
+			<c:if test="${not empty sessionScope.currentUser}">
+				<form action="${pageContext.request.contextPath}/showlogin"
+					method="get">
+					<button type="submit" style="background: #dc3545; color: white;">Logout</button>
+				</form>
+			</c:if>
 		</nav>
 	</header>
 
 	<main>
 		<h2>Products</h2>
 
+		<!-- Cart message -->
 		<c:if test="${not empty cartMessage}">
-			<div
-				style="text-align: center; margin-bottom: 20px; color: green; font-weight: 500;">
-				${cartMessage}</div>
+			<div id="cartMessage" class="floating-message"
+				style="background: #28a745; color: white;">${cartMessage}</div>
+		</c:if>
+
+		<!-- Wishlist message -->
+		<c:if test="${not empty wishlistMessage}">
+			<div id="wishlistMessage" class="floating-message"
+				style="background: #ff4757; color: white;">${wishlistMessage}
+			</div>
 		</c:if>
 
 		<c:choose>
@@ -269,15 +307,28 @@ footer {
 							<img src="${productImages[product.id]}" alt="${product.name}">
 							<h3>${product.name}</h3>
 							<p>Price: ₹ ${product.cost}</p>
-							<p>Stock: ${product.stock}</p>
+							<p>
+								<c:choose>
+									<c:when test="${product.stock > 0}">
+							            Stock: ${product.stock}
+							        </c:when>
+									<c:otherwise>
+										<span style="color: red; font-weight: bold;">Out of
+											Stock</span>
+									</c:otherwise>
+								</c:choose>
+							</p>
 							<p>Category: ${product.category}</p>
 
 							<div class="button-row">
-								<form action="addToCart" method="post">
-									<input type="hidden" name="productId" value="${product.id}">
-									<button type="submit" class="button-inline button-cart">Add
-										to Cart</button>
-								</form>
+								<c:if test="${product.stock > 0}">
+									<form action="addToCart" method="post">
+										<input type="hidden" name="productId" value="${product.id}">
+										<button type="submit" class="button-inline button-cart">Add
+											to Cart</button>
+									</form>
+								</c:if>
+
 								<form action="viewProduct" method="get">
 									<input type="hidden" name="productId" value="${product.id}">
 									<button type="submit" class="button-inline button-view">View</button>
@@ -300,7 +351,20 @@ footer {
 		</c:choose>
 	</main>
 
-	<footer> &copy; 2026 My E-Commerce Store </footer>
+	<footer> &copy; 2026 Techouts Store </footer>
+
+	<!-- JavaScript to hide messages after 2 seconds -->
+	<script>
+		const cartMsg = document.getElementById('cartMessage');
+		if(cartMsg){
+			setTimeout(() => { cartMsg.style.display = 'none'; }, 2000);
+		}
+
+		const wishlistMsg = document.getElementById('wishlistMessage');
+		if(wishlistMsg){
+			setTimeout(() => { wishlistMsg.style.display = 'none'; }, 2000);
+		}
+	</script>
 
 </body>
 </html>

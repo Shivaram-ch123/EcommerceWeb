@@ -113,6 +113,12 @@ button:hover {
 
 		</form>
 
+		<a href="${pageContext.request.contextPath}/myCart">
+			<button type="button"
+				style="background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px;">
+				← Back to Cart</button>
+		</a>
+
 	</div>
 
 </body>

@@ -63,6 +63,7 @@ body {
     color: red;
     font-size: 12px;
 }
+
 .register-container a {
     display: block;
     text-align: center;
@@ -70,8 +71,17 @@ body {
     color: #6c757d;
     text-decoration: none;
 }
+
 .register-container a:hover {
     text-decoration: underline;
+}
+
+/* For general error messages */
+.general-error {
+    color: red;
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 14px;
 }
 </style>
 </head>
@@ -79,6 +89,11 @@ body {
 
 <div class="register-container">
     <h2>Register</h2>
+
+    <!-- Show general error message if email exists -->
+    <c:if test="${not empty errorMessage}">
+        <div class="general-error">${errorMessage}</div>
+    </c:if>
 
     <form:form action="registerUser" method="post" modelAttribute="user">
         <!-- Username -->

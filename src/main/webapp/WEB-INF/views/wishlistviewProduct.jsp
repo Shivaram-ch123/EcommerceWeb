@@ -29,7 +29,7 @@ body {
 	flex-direction: column;
 }
 
-/* ===== Header =+==== */
+/* ===== Header ===== */
 header {
 	background: #0a1238;
 	color: white;
@@ -135,6 +135,23 @@ main {
 	margin: 8px 0;
 	font-size: 16px;
 	color: #555;
+}
+
+/* ===== Floating Flash Message ===== */
+#cart-message {
+	position: fixed;
+	top: 80px; /* below header */
+	left: 50%;
+	transform: translateX(-50%);
+	background-color: #28a745;
+	color: white;
+	padding: 12px 20px;
+	border-radius: 5px;
+	font-weight: 500;
+	box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+	z-index: 2000;
+	opacity: 1;
+	transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 /* ===== Buttons ===== */
@@ -271,6 +288,13 @@ footer {
 
 	</header>
 
+	<!-- ===== Flash Message ===== -->
+	<c:if test="${not empty cartMessage}">
+	    <div id="cart-message">
+	        ${cartMessage}
+	    </div>
+	</c:if>
+
 	<!-- ===== Main ===== -->
 
 	<main>
@@ -317,10 +341,10 @@ footer {
 
 				<div class="action-buttons">
 
-					<a href="showCategory?category=${param.category}" class="back-btn">
+					<a href="showWishlist" class="back-btn">
 						Back to Products </a>
 
-					<form action="addToCart" method="post">
+					<form action="addToCart1" method="post">
 						<input type="hidden" name="productId" value="${product.id}">
 						<button type="submit" class="add-cart-btn">Add to Cart</button>
 					</form>
@@ -341,6 +365,18 @@ footer {
 	<!-- ===== Footer ===== -->
 
 	<footer> &copy; 2026 Techouts Store </footer>
+
+	<!-- ===== JS for Floating Flash Message ===== -->
+	<script>
+	    const msg = document.getElementById('cart-message');
+	    if(msg){
+	        setTimeout(() => {
+	            msg.style.opacity = '0';
+	            msg.style.transform = 'translateY(-20px)';
+	            setTimeout(() => msg.style.display = 'none', 500);
+	        }, 2000); // 2 seconds
+	    }
+	</script>
 
 </body>
 </html>
