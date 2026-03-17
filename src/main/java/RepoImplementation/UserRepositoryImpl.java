@@ -20,7 +20,7 @@ public class UserRepositoryImpl   implements UserRepositoryCustom{
 	@Override
 	public boolean userExistanceByEmailAndPassword(String email,String password) {
 		//crating a querry 
-		String jpql = "SELECT u FROM Users u WHERE u.email = :email AND u.password = :password";
+		String jpql = "SELECT u FROM Users u WHERE u.email = :email AND u.password = :password ORDER BY u.id";
 		List<Users> list = entityManager.createQuery(jpql,Users.class)
 		.setParameter("email", email)
 		.setParameter("password", password)
@@ -35,7 +35,7 @@ public class UserRepositoryImpl   implements UserRepositoryCustom{
 	@Override
 	public Users userExistanceByEmailAndPasswordReturn(String email,String password) {
 		//crating a querry 
-		String jpql = "SELECT u FROM Users u WHERE u.email = :email AND u.password = :password";
+		String jpql = "SELECT u FROM Users u WHERE u.email = :email AND u.password = :password ORDER BY u.id";
 		List<Users> list = entityManager.createQuery(jpql,Users.class)
 		.setParameter("email", email)
 		.setParameter("password", password)

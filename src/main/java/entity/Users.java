@@ -11,81 +11,97 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
-@Entity
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
+@Entity
 public class Users {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-	private String userName;
-	private String password;
-	private String phoneNumber;
-	private String email;
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    private String userName;
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<CartItems> carts = new ArrayList<CartItems>();
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
+    private String password;
 
-	public int getId() {
-		return id;
-	}
+    @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be 10 digits")
+    private String phoneNumber;
 
-	public List<CartItems> getCarts() {
-		return carts;
-	}
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email should be valid")
+    private String email;
 
-	public void setCarts(List<CartItems> carts) {
-		this.carts = carts;
-	}
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CartItems> carts = new ArrayList<>();
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    // Default constructor
+    public Users() {
+        super();
+    }
 
-	public String getUserName() {
-		return userName;
-	}
+    // Parameterized constructor
+    public Users(String userName, String password, String phoneNumber, String email) {
+        this.userName = userName;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+    }
 
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
+    // Getters and Setters
 
-	public String getPassword() {
-		return password;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
+    public String getUserName() {
+        return userName;
+    }
 
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public Users(String userName, String password, String phoneNumber, String email) {
-		super();
-		this.userName = userName;
-		this.password = password;
-		this.phoneNumber = phoneNumber;
-		this.email = email;
-	}
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
 
-	public Users() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public List<CartItems> getCarts() {
+        return carts;
+    }
+
+    public void setCarts(List<CartItems> carts) {
+        this.carts = carts;
+    }
 }

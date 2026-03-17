@@ -115,7 +115,8 @@ body {
 			</p>
 
 			<!-- Back Button -->
-			<a class="btn" href="${pageContext.request.contextPath}/home">Back
+			<a class="btn"
+				href="${pageContext.request.contextPath}/showCategory?category=${category}">Back
 				to Products</a>
 		</c:if>
 

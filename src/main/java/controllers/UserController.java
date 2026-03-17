@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,18 +45,27 @@ public class UserController {
 	OrderService orderService;
 
 	@PostMapping("/registerUser")
-	public String registerUser(Users user) {
+	public String registerUser(@Valid @ModelAttribute("user") Users user, BindingResult bindingResult, Model model) {
+		System.out.println("You are in registerUser Method");
+
+		// Check for validation errors
+		if (bindingResult.hasErrors()) {
+			return "Register"; // return back to JSP with errors
+		}
+
 		System.out.println(user.getId() + " " + user.getEmail() + " " + user.getPassword());
-		// i need to use thoes services here
-		System.out.println("You are in registerUser Methods");
+
+		// Use your existing service to register user
 		if (userService.registerUser(user)) {
-			// i need to set the user Information
+			// Set default user information
 			Information information = new Information("none", "/images/pImage.jpg", user);
 			userService.saveInformation(information);
-			return "LoginPage";
+			return "LoginPage"; // registration successful
 		}
-		return "SomeThingWengWrong";
 
+		// If something went wrong during registration
+		model.addAttribute("errorMessage", "Something went wrong. Please try again.");
+		return "Register";
 	}
 
 	@RequestMapping("/showlogin")
@@ -62,7 +74,8 @@ public class UserController {
 	}
 
 	@GetMapping("")
-	public String showRegisterForm() {
+	public String showRegisterForm(Model model) {
+		model.addAttribute("user", new Users());
 		return "redirect:/showCategory?category=";
 	}
 
@@ -71,11 +84,10 @@ public class UserController {
 		return "redirect:/showCategory?category=";
 	}
 
-
-
-	@GetMapping("register")
-	public String showReg() {
-		return "Register";
+	@GetMapping("/register")
+	public String showReg(Model model) {
+		model.addAttribute("user", new Users());
+		return "Register"; // JSP name
 	}
 
 	@PostMapping("/addToCart")
@@ -239,20 +251,24 @@ public class UserController {
 	}
 
 	@PostMapping("/placeOneOrder")
-	public String placeOneOrder(@RequestParam String address, @RequestParam String dateOfDelivery,
-			@RequestParam String paymentMode, @RequestParam long productId, // capture the productId
-			HttpSession session) {
+	public String placeOneOrder(@RequestParam String address, @RequestParam String paymentMode,
+			@RequestParam long productId, // capture the productId
+			HttpSession session, Model model) {
 
 		Users user = (Users) session.getAttribute("currentUser");
-		System.out.println(user.getUserName() + "-----");
+
+		// Create new order
 		Orders order = new Orders();
 		order.setUser(user);
 		order.setAddress(address);
 		order.setPaymentMode(paymentMode);
-		order.setDateOfDelivery(LocalDate.parse(dateOfDelivery));
 
+		// ✅ Random delivery date between 4 and 10 days from today
+		int randomDays = 4 + (int) (Math.random() * 7); // 4 + 0..6 = 4..10
+		order.setDateOfDelivery(LocalDate.now().plusDays(randomDays));
+
+		// Prepare order item
 		List<OrderItem> orderItems = new ArrayList<>();
-
 		Products product = productService.getProductById(productId);
 
 		if (product != null) {
@@ -265,9 +281,19 @@ public class UserController {
 
 		order.setProducts(orderItems);
 
+		// Calculate total amount
+		double totalAmount = orderItems.stream().mapToDouble(item -> item.getQuantity() * item.getProduct().getCost())
+				.sum();
+		double finalPrice = (totalAmount < 300 ? totalAmount + 120 : totalAmount);
+		order.setTotalAmount(finalPrice);
+
+		// Save order
 		orderService.saveOrder(order);
 
-		return "orderSuccess";
+		// Pass order to JSP for summary display
+		model.addAttribute("order", order);
+
+		return "orderSuccess"; // shows order success page
 	}
 
 }

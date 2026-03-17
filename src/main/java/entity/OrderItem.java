@@ -20,12 +20,17 @@ public class OrderItem {
 
     private int quantity;
 
+    // NEW FIELD
+    @Column(name = "status")
+    private String status = "ACTIVE";
+
     public OrderItem() {}
 
     public OrderItem(Orders order, Products product, int quantity) {
         this.order = order;
         this.product = product;
         this.quantity = quantity;
+        this.status = "ACTIVE";
     }
 
     public int getId() {
@@ -54,5 +59,15 @@ public class OrderItem {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    // STATUS GETTER SETTER
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

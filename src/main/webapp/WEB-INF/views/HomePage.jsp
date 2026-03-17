@@ -256,10 +256,9 @@ footer {
 		<h2>Products</h2>
 
 		<c:if test="${not empty cartMessage}">
-			<script>
-				alert('${cartMessage}');
-				window.location.href = 'showCategory?category=';
-			</script>
+			<div
+				style="text-align: center; margin-bottom: 20px; color: green; font-weight: 500;">
+				${cartMessage}</div>
 		</c:if>
 
 		<c:choose>
