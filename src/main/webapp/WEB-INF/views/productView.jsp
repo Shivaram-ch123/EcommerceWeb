@@ -29,7 +29,7 @@ body {
 	flex-direction: column;
 }
 
-/* ===== Header =+==== */
+/* ===== Header ===== */
 header {
 	background: #0a1238;
 	color: white;
@@ -75,6 +75,20 @@ nav select {
 	border: none;
 	cursor: pointer;
 	font-weight: 500;
+}
+
+/* ===== Floating Message ===== */
+.floating-message {
+	position: fixed;
+	top: 90px;
+	left: 50%;
+	transform: translateX(-50%);
+	padding: 12px 20px;
+	border-radius: 8px;
+	font-weight: 500;
+	z-index: 2000;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+	opacity: 0.95;
 }
 
 /* ===== Main ===== */
@@ -217,14 +231,13 @@ footer {
 
 <body>
 
-	<!-- ===== Header ===== -->
-
 	<header>
-
 		<h1>Techouts Store</h1>
 
 		<nav>
-
+			<form action="showhomepag" method="get">
+				<button type="submit">Home</button>
+			</form>
 			<form action="myCart" method="get">
 				<button type="submit">My Cart</button>
 			</form>
@@ -238,9 +251,7 @@ footer {
 			</form>
 
 			<form action="showCategory" method="post">
-
 				<select name="category" onchange="this.form.submit()">
-
 					<option value=""
 						<c:if test="${param.category == ''}">selected</c:if>>All
 						Categories</option>
@@ -252,9 +263,7 @@ footer {
 					<option value="Laptops"
 						<c:if test="${param.category == 'Laptops'}">selected</c:if>>
 						Laptops</option>
-
 				</select>
-
 			</form>
 
 			<form action="${pageContext.request.contextPath}/showWishlist"
@@ -266,31 +275,28 @@ footer {
 				method="get">
 				<button type="submit" style="background: #dc3545; color: white;">Logout</button>
 			</form>
-
 		</nav>
-
 	</header>
 
-	<!-- ===== Main ===== -->
-
 	<main>
+
+		<!-- ✅ Floating Cart Message -->
+		<c:if test="${not empty cartMessage}">
+			<div id="cartMessage" class="floating-message"
+				style="background: #28a745; color: white;">${cartMessage}</div>
+		</c:if>
 
 		<div class="product-container">
 
 			<div class="product-image">
-
 				<c:choose>
-
 					<c:when test="${not empty image}">
 						<img src="${image.url}" alt="${product.name}">
 					</c:when>
-
 					<c:otherwise>
 						<img src="/images/no-image.png" alt="No Image Available">
 					</c:otherwise>
-
 				</c:choose>
-
 			</div>
 
 			<div class="product-details">
@@ -320,7 +326,7 @@ footer {
 					<a href="showCategory?category=${param.category}" class="back-btn">
 						Back to Products </a>
 
-					<form action="addToCart" method="post">
+					<form action="addToCartView" method="post">
 						<input type="hidden" name="productId" value="${product.id}">
 						<button type="submit" class="add-cart-btn">Add to Cart</button>
 					</form>
@@ -338,9 +344,15 @@ footer {
 
 	</main>
 
-	<!-- ===== Footer ===== -->
-
 	<footer> &copy; 2026 Techouts Store </footer>
+
+	<!-- ✅ Auto hide message -->
+	<script>
+	const cartMsg = document.getElementById('cartMessage');
+	if(cartMsg){
+		setTimeout(() => { cartMsg.style.display = 'none'; }, 2000);
+	}
+</script>
 
 </body>
 </html>

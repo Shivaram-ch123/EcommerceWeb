@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import entity.CartItems;
-import entity.Users;
 import service.CartService;
 import service.ProductService;
 import service.UserService;
@@ -57,6 +55,7 @@ public class CartController {
 	public String incrementQuantity(@RequestParam("productId") int productId, HttpSession session) {
 		
 		
+		
 		Users user = (Users) session.getAttribute("currentUser");
 		int userId = user.getId();
 
@@ -67,6 +66,7 @@ public class CartController {
 
 		return "redirect:/myCart";
 	}
+	
 
 	@PostMapping("/decrease")
 	public String DecrementQuantity(@RequestParam("productId") int productId, HttpSession session) {

@@ -186,6 +186,9 @@ footer {
 				<button type="submit">Signin</button>
 			</form>
 		</c:if>
+		<form action="showhomepag" method="get">
+				<button type="submit">Home</button>
+			</form>
 
 		<form action="myCart" method="get">
 			<button type="submit">My Cart</button>

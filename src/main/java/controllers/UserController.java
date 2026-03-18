@@ -1,4 +1,5 @@
 package controllers;
+
 import java.util.*;
 import repository.*;
 import java.time.LocalDate;
@@ -57,7 +58,8 @@ public class UserController {
 	CartItemsRepository cartItemsRepository;
 
 	@PostMapping("/registerUser")
-	public String registerUser(@Valid @ModelAttribute("user") Users user, BindingResult bindingResult, Model model) {
+	public String registerUser(@Valid @ModelAttribute("user") Users user, BindingResult bindingResult, Model model,
+			HttpSession session) {
 		System.out.println("You are in registerUser Method");
 
 		// Check for validation errors
@@ -67,18 +69,16 @@ public class UserController {
 
 		System.out.println(user.getId() + " " + user.getEmail() + " " + user.getPassword());
 
-		
 		if (userService.registerUser(user)) {
-			
+
 			Information information = new Information("none", "/images/pImage.jpg", user);
 			userService.saveInformation(information);
-			return "redirect:/showCategory?category="; 
-		}
-		else {
-			
+			session.setAttribute("currentUser", user);
+			return "redirect:/showCategory?category=";
+		} else {
+
 		}
 
-		
 		model.addAttribute("errorMessage", "Email Exists. Please try again.");
 		return "Register";
 	}
@@ -106,66 +106,92 @@ public class UserController {
 	}
 
 	@PostMapping("/addToCart")
-	public String addToCart(@RequestParam("productId") Integer productId,
-	                       HttpSession session,
-	                       RedirectAttributes redirectAttrs,
-	                       Model model) {
+	public String addToCart(@RequestParam("productId") Integer productId, HttpSession session,
+			RedirectAttributes redirectAttrs, Model model) {
 
-	    Users user = (Users) session.getAttribute("currentUser");
-	    if (user == null) {
-	        return "redirect:/register";
-	    }
+		Users user = (Users) session.getAttribute("currentUser");
+		if (user == null) {
+			return "redirect:/register";
+		}
 
-	    int userId = user.getId();
+		int userId = user.getId();
 
-	    // Get current quantity of this product in user's cart
-	    int userQuantity =cartService.updateCartItemQuantity(userId, productId, 0); 
+		// Get current quantity of this product in user's cart
+		int userQuantity = cartService.updateCartItemQuantity(userId, productId, 0);
 
-	    Products product = productService.getProductById((long) productId);
+		Products product = productService.getProductById((long) productId);
 
-	    // 🔴 STOCK CHECK
-	    if (userQuantity >= product.getStock()) {
-	        redirectAttrs.addFlashAttribute("cartMessage", "No stock available for this product!");
-	        return "redirect:/showCategory?category=";
-	    }
+		// 🔴 STOCK CHECK
+		if (userQuantity >= product.getStock()) {
+			redirectAttrs.addFlashAttribute("cartMessage", "No stock available for this product!");
+			return "redirect:/showCategory?category=";
+		}
 
-	    // ✅ ADD TO CART
-	    String message = userService.addToCart(user, productId);
-	    redirectAttrs.addFlashAttribute("cartMessage", message);
+		// ✅ ADD TO CART
+		String message = userService.addToCart(user, productId);
+		redirectAttrs.addFlashAttribute("cartMessage", message);
 
-	    return "redirect:/showCategory?category=";
+		return "redirect:/showCategory?category=";
 	}
+
 	@PostMapping("/addToCart1")
-	public String addToCart1(@RequestParam("productId") Integer productId,
-	                       HttpSession session,
-	                       RedirectAttributes redirectAttrs,
-	                       Model model) {
+	public String addToCart1(@RequestParam("productId") Integer productId, HttpSession session,
+			RedirectAttributes redirectAttrs, Model model) {
 
-	    Users user = (Users) session.getAttribute("currentUser");
-	    if (user == null) {
-	        return "redirect:/register";
-	    }
+		Users user = (Users) session.getAttribute("currentUser");
+		if (user == null) {
+			return "redirect:/register";
+		}
 
-	    int userId = user.getId();
+		int userId = user.getId();
 
-	    // Get current quantity of this product in user's cart
-	    int userQuantity =cartService.updateCartItemQuantity(userId, productId, 0); 
+		// Get current quantity of this product in user's cart
+		int userQuantity = cartService.updateCartItemQuantity(userId, productId, 0);
 
-	    Products product = productService.getProductById((long) productId);
+		Products product = productService.getProductById((long) productId);
 
-	    // 🔴 STOCK CHECK
-	    if (userQuantity >= product.getStock()) {
-	        redirectAttrs.addFlashAttribute("cartMessage", "No stock available for this product!");
-	        return "redirect:/isAvailable";
-	    }
+		// 🔴 STOCK CHECK
+		if (userQuantity >= product.getStock()) {
+			redirectAttrs.addFlashAttribute("cartMessage", "No stock available for this product!");
+			return "redirect:/isAvailable";
+		}
 
-	    // ✅ ADD TO CART
-	    String message = userService.addToCart(user, productId);
-	    redirectAttrs.addFlashAttribute("cartMessage", message);
-	    
-	    return "redirect:/viewProductdublicate?productId="+productId;
+		// ✅ ADD TO CART
+		String message = userService.addToCart(user, productId);
+		redirectAttrs.addFlashAttribute("cartMessage", message);
+
+		return "redirect:/viewProductdublicate?productId=" + productId;
 	}
-	
+
+	@PostMapping("/addToCartView")
+	public String addToCartView(@RequestParam("productId") Integer productId, HttpSession session,
+			RedirectAttributes redirectAttrs, Model model) {
+
+		Users user = (Users) session.getAttribute("currentUser");
+		if (user == null) {
+			return "redirect:/register";
+		}
+
+		int userId = user.getId();
+
+		// Get current quantity of this product in user's cart
+		int userQuantity = cartService.updateCartItemQuantity(userId, productId, 0);
+
+		Products product = productService.getProductById((long) productId);
+
+		// 🔴 STOCK CHECK
+		if (userQuantity >= product.getStock()) {
+			redirectAttrs.addFlashAttribute("cartMessage", "No stock available for this product!");
+			return "redirect:/viewProduct?productId=" + productId;
+		}
+
+		// ✅ ADD TO CART
+		String message = userService.addToCart(user, productId);
+		redirectAttrs.addFlashAttribute("cartMessage", message);
+
+		return "redirect:/viewProduct?productId=" + productId;
+	}
+
 	@GetMapping("/isAvailable")
 	public String temp() {
 		return "ordersNotAvailable";
@@ -173,14 +199,14 @@ public class UserController {
 
 	@PostMapping("/checkUser")
 	public String checkUser(@RequestParam("email") String email, @RequestParam("password") String password,
-			HttpSession session ,Model model) {
+			HttpSession session, Model model) {
 
 		Users user = userService.checkUserExistsReturn(email, password);
 		if (user != null) {
 			session.setAttribute("currentUser", user);
 			return "redirect:/";
 		}
-		 
+
 		return "redirect:/showlogin";
 	}
 
@@ -217,9 +243,9 @@ public class UserController {
 	}
 
 	@PostMapping("/updateProfileDetails")
-	public String updateProfileDetails(Users updatedUser, HttpSession session, RedirectAttributes redirectAttrs,@RequestParam("address") String add) {
-		
-		
+	public String updateProfileDetails(Users updatedUser, HttpSession session, RedirectAttributes redirectAttrs,
+			@RequestParam("address") String add) {
+
 		Users currentUser = (Users) session.getAttribute("currentUser");
 
 		if (currentUser == null) {
@@ -247,9 +273,9 @@ public class UserController {
 			}
 
 			userService.updateUserProfile(updatedUser);
-			
+
 			// here i need to save in to the infotable
-			Information info=  informationRepository.findByUser(updatedUser);
+			Information info = informationRepository.findByUser(updatedUser);
 			info.setAddress(add);
 			informationRepository.save(info);
 
@@ -299,17 +325,14 @@ public class UserController {
 		// map product IDs to their first image (if exists)
 		Map<Long, Images> productImages = new HashMap<>();
 		for (Products p : wishlist) {
-		    Images img = imageService.getImageByProductId(p.getId()); 
-		    if (img != null) {
-		        productImages.put(p.getId(), img);
-		    }
+			Images img = imageService.getImageByProductId(p.getId());
+			if (img != null) {
+				productImages.put(p.getId(), img);
+			}
 		}
 
 		model.addAttribute("wishlistProducts", wishlist);
 		model.addAttribute("productImages", productImages);
-		
-		
-		
 
 		return "wishlist";
 	}
@@ -328,41 +351,33 @@ public class UserController {
 	public String home() {
 		return "HomePage";
 	}
-	
+
 	@GetMapping("/viewProductdublicate")
 	public String home1(@RequestParam("productId") Long productId, Model model) {
-		
+
 		Products product = productService.getProductById(productId);
 		Images image = imageService.getImageByProductId(productId);
 
 		model.addAttribute("product", product);
-		model.addAttribute("image",image);
+		model.addAttribute("image", image);
 
 		return "wishlistviewProduct";
 	}
 
 	@PostMapping("/buyNow")
-	public String buyNow(@RequestParam("productId") long productId, Model model,HttpSession session) {
+	public String buyNow(@RequestParam("productId") long productId, Model model, HttpSession session) {
 		model.addAttribute("productId", productId);
-		
-		
-		//Users user = (Users) session.getAttribute("currentUser");
 
-		
+		// Users user = (Users) session.getAttribute("currentUser");
+
 		Users user = (Users) session.getAttribute("currentUser");
 
 		Products product = productService.getProductById(productId);
-			if(1>product.getStock()) {
-				return "ordersNotAvailable";
-			}
-		
-		
-		
-		
-		
-		
-		
-		
+		if (1 > product.getStock()) {
+			return "ordersNotAvailable";
+		}
+		model.addAttribute("productId", productId);
+		model.addAttribute("quantity", 1);
 		return "getDetails";
 	}
 
@@ -411,5 +426,59 @@ public class UserController {
 
 		return "orderSuccess"; // shows order success page
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	// ➕ Increase Quantity
+    @PostMapping("/increaseCheckoutQty")
+    public String increaseQty(@RequestParam("productId") Long productId,
+                              HttpSession session) {
+
+        Integer qty = (Integer) session.getAttribute("quantity");
+
+        if (qty == null) {
+            qty = 1;
+        } else {
+            qty++;
+        }
+
+        session.setAttribute("quantity", qty);
+
+        // redirect back to checkout page with productId
+        return "redirect:/checkout?productId=" + productId;
+    }
+
+    // ➖ Decrease Quantity
+    @PostMapping("/decreaseCheckoutQty")
+    public String decreaseQty(@RequestParam("productId") Long productId,
+                              HttpSession session) {
+
+        Integer qty = (Integer) session.getAttribute("quantity");
+
+        if (qty == null || qty <= 1) {
+            qty = 1; // prevent going below 1
+        } else {
+            qty--;
+        }
+
+        session.setAttribute("quantity", qty);
+
+        return "redirect:/checkout?productId=" + productId;
+    }
 
 }

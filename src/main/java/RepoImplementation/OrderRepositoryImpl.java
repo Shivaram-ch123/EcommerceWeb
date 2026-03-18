@@ -12,15 +12,13 @@ import RepositoryCustom.OrderRepositoryCustom;
 @Repository
 public class OrderRepositoryImpl implements OrderRepositoryCustom {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+	@PersistenceContext
+	private EntityManager entityManager;
 
-    @Override
-    public List<Orders> getRowsUserId(Users user) {
-        String jpql = "SELECT o FROM Orders o WHERE o.user = :user ORDER BY o.id";
+	@Override
+	public List<Orders> getRowsUserId(Users user) {
+		String jpql = "SELECT o FROM Orders o WHERE o.user = :user ORDER BY o.id DESC";
 
-        return entityManager.createQuery(jpql, Orders.class)
-                .setParameter("user", user)
-                .getResultList();
-    }
+		return entityManager.createQuery(jpql, Orders.class).setParameter("user", user).getResultList();
+	}
 }

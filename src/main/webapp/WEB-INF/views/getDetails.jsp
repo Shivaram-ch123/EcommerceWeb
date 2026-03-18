@@ -7,7 +7,6 @@
 <meta charset="UTF-8">
 <title>Checkout - Techouts Store</title>
 
-<!-- Google Fonts -->
 <link
 	href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
 	rel="stylesheet">
@@ -33,7 +32,7 @@ body {
 
 /* Header */
 header {
-	background: #0a1238; /* Dark blue header */
+	background: #0a1238;
 	color: white;
 	padding: 20px 40px;
 	display: flex;
@@ -82,7 +81,7 @@ nav select {
 
 /* Checkout container */
 main {
-	padding: 120px 30px 30px 30px; /* top padding for fixed header */
+	padding: 120px 30px 30px 30px;
 }
 
 .container {
@@ -169,7 +168,9 @@ footer {
 					<button type="submit">Signin</button>
 				</form>
 			</c:if>
-
+			<form action="showhomepag" method="get">
+				<button type="submit">Home</button>
+			</form>
 			<form action="myCart" method="get">
 				<button type="submit">My Cart</button>
 			</form>
@@ -213,10 +214,21 @@ footer {
 				<input type="hidden" name="productId" value="${productId}" /> <label
 					for="address">Address:</label> <input type="text" id="address"
 					name="address" required /> <label for="paymentMode">Payment
-					Mode:</label> <select id="paymentMode" name="paymentMode" required>
+					Mode:</label> <select id="paymentMode" name="paymentMode" required
+					onchange="toggleCardFields()">
 					<option value="COD">Cash on Delivery</option>
 					<option value="Card">Card</option>
 				</select>
+
+				<!-- ✅ ADDED CARD FIELDS -->
+				<div id="cardDetails" style="display: none; text-align: left;">
+					<label for="cardType">Card Type:</label> <select id="cardType"
+						name="cardType">
+						<option value="Visa">Visa</option>
+						<option value="MasterCard">MasterCard</option>
+					</select> <label for="cardNumber">Card Number:</label> <input type="text"
+						id="cardNumber" name="cardNumber" maxlength="16" />
+				</div>
 
 				<button type="submit" class="checkout-btn">Place Order</button>
 			</form>
@@ -231,6 +243,23 @@ footer {
 	</main>
 
 	<footer> &copy; 2026 Techouts Store </footer>
+
+	<!-- ✅ ONLY ADDED SCRIPT -->
+	<script>
+		function toggleCardFields() {
+			const mode = document.getElementById("paymentMode").value;
+			const cardDiv = document.getElementById("cardDetails");
+			const cardNumber = document.getElementById("cardNumber");
+
+			if (mode === "Card") {
+				cardDiv.style.display = "block";
+				cardNumber.required = true;
+			} else {
+				cardDiv.style.display = "none";
+				cardNumber.required = false;
+			}
+		}
+	</script>
 
 </body>
 </html>
